@@ -19,7 +19,7 @@ TRMI.dai.2015 = TRMI.dai.2015[which (TRMI.dai.2015$dataType == 'News_Social'),]
 # Daily Crude Prices
 PRICE.2011 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2011-01-01\' AND "Date" < \'2015-01-01\'ORDER BY "Date"')
 PRICE.2015 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2015-01-01\' AND "Date" < \'2016-01-01\'ORDER BY "Date"')
-# Minor Adjustment for Missing Data
+# Minor Adjustment for Missing Crude Oil Data
 PRICE.2015[353:365,] = rbind (c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, NA),
                                     c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, NA),
                                     c ('CRU', '2015-12-21', NA, 34.58, 34.86, 33.98, 34.66, NA),
