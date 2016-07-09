@@ -11,16 +11,16 @@ driver = dbDriver('PostgreSQL')
 connection = dbConnect(driver, dbname = 'OMITTED', host = 'OMITTED', port = 'OMITTED', user = 'OMITTED', password = 'OMITTED')
 
 # News and Social Media Daily TRMI
-Crude.TRMI.dai.2011 = dbGetQuery (connection, 'SELECT * FROM trmiv22_dai_enm WHERE "Asset" = \'CRU\' AND "Date" >= \'2011-01-01\' AND "Date" < \'2015-01-01\' ORDER BY "Date"')
-Crude.TRMI.dai.2011 = Crude.TRMI.dai.2011[which (Crude.TRMI.dai.2011$dataType == 'News_Social'),]
-Crude.TRMI.dai.2015 = dbGetQuery (connection, 'SELECT * FROM trmiv22_dai_enm WHERE "Asset" = \'CRU\' AND "Date" >= \'2015-01-01\' AND "Date" < \'2016-01-01\'ORDER BY "Date"')
-Crude.TRMI.dai.2015 = Crude.TRMI.dai.2015[which (Crude.TRMI.dai.2015$dataType == 'News_Social'),]
+TRMI.dai.2011 = dbGetQuery (connection, 'SELECT * FROM trmiv22_dai_enm WHERE "Asset" = \'CRU\' AND "Date" >= \'2011-01-01\' AND "Date" < \'2015-01-01\' ORDER BY "Date"')
+TRMI.dai.2011 = TRMI.dai.2011[which (TRMI.dai.2011$dataType == 'News_Social'),]
+TRMI.dai.2015 = dbGetQuery (connection, 'SELECT * FROM trmiv22_dai_enm WHERE "Asset" = \'CRU\' AND "Date" >= \'2015-01-01\' AND "Date" < \'2016-01-01\'ORDER BY "Date"')
+TRMI.dai.2015 = TRMI.dai.2015[which (TRMI.dai.2015$dataType == 'News_Social'),]
 
 # Daily Crude Prices
-Crude.PRICE.2011 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2011-01-01\' AND "Date" < \'2015-01-01\'ORDER BY "Date"')
-Crude.PRICE.2015 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2015-01-01\' AND "Date" < \'2016-01-01\'ORDER BY "Date"')
+PRICE.2011 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2011-01-01\' AND "Date" < \'2015-01-01\'ORDER BY "Date"')
+PRICE.2015 = dbGetQuery (connection, 'SELECT * FROM prices_unadj WHERE "Asset" = \'CRU\' AND "Date" >= \'2015-01-01\' AND "Date" < \'2016-01-01\'ORDER BY "Date"')
 # Minor Adjustment for Missing Data
-Crude.PRICE.2015[353:365,] = rbind (c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, NA),
+PRICE.2015[353:365,] = rbind (c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, NA),
                                     c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, NA),
                                     c ('CRU', '2015-12-21', NA, 34.58, 34.86, 33.98, 34.66, NA),
                                     c ('CRU', '2015-12-22', NA, 35.80, 36.54, 35.66, 36.47, NA),
@@ -34,7 +34,7 @@ Crude.PRICE.2015[353:365,] = rbind (c ('CRU', '2015-12-19', NA, NA, NA, NA, NA, 
                                     c ('CRU', '2015-12-30', NA, 37.36, 37.40, 36.40, 36.83, NA),
                                     c ('CRU', '2015-12-31', NA, 36.81, 37.79, 36.22, 37.07, NA)
 )
-Crude.PRICE.2015 = transform (Crude.PRICE.2015, Time = as.logical (Time), Open = as.numeric (Open), High = as.numeric (High), Low = as.numeric (Low), Close =  as.numeric (Close), Volume = as.numeric (Volume))
+PRICE.2015 = transform (PRICE.2015, Time = as.logical (Time), Open = as.numeric (Open), High = as.numeric (High), Low = as.numeric (Low), Close =  as.numeric (Close), Volume = as.numeric (Volume))
 
 # Disconnect
 dbDisconnect (connection)
@@ -119,29 +119,29 @@ single.optim.fn = function (splitfactor, sentiment.vector, price.matrix, associa
   updown = NULL
   
   # Loop to construct the sequence of price directions
-  for (i in 1:length (Crude.PRICE.2011[,'Close'])){
-    if (is.na (Crude.PRICE.2011[i,'Close'])){
+  for (i in 1:length (price.matrix[,'Close'])){
+    if (is.na (price.matrix[i,'Close'])){
       updown = c (updown, NULL)
-    } else if (is.na (Crude.PRICE.2011[i-1,'Close'])){
+    } else if (is.na (price.matrix[i-1,'Close'])){
       step = 1
       close.temp = 0
-      while (is.na (Crude.PRICE.2011[i - step, 'Close'])){
-        if (Crude.PRICE.2011[i - step,'Date'] == Crude.PRICE.2011[1,'Date']){
-          close.temp = Crude.PRICE.2011[i,'Open']
+      while (is.na (price.matrix[i - step, 'Close'])){
+        if (price.matrix[i - step,'Date'] == price.matrix[1,'Date']){
+          close.temp = price.matrix[i,'Open']
           break
         }
         step = step + 1
       }
       if (close.temp == 0){
-        close.temp = Crude.PRICE.2011[i - step, 'Close']
+        close.temp = price.matrix[i - step, 'Close']
       }
-      if (Crude.PRICE.2011[i, 'Close'] > close.temp){
+      if (price.matrix[i, 'Close'] > close.temp){
         updown = c (updown, TRUE)
       } else {
         updown = c (updown, FALSE)
       }
     } else {
-      if (Crude.PRICE.2011[i, 'Close'] > Crude.PRICE.2011[i - 1,'Close']){
+      if (price.matrix[i, 'Close'] > price.matrix[i - 1,'Close']){
         updown = c (updown, TRUE)
       } else {
         updown = c (updown, FALSE)
@@ -151,9 +151,9 @@ single.optim.fn = function (splitfactor, sentiment.vector, price.matrix, associa
   
   # Count portion of correct predictions
   if (association.point == 1){
-    return (sum (single.binary.vector[!is.na(Crude.PRICE.2011[,'Close'])] == updown) / length (updown))
+    return (sum (single.binary.vector[!is.na(price.matrix[,'Close'])] == updown) / length (updown))
   } else {
-    return (sum (single.binary.vector[!is.na(Crude.PRICE.2011[,'Close'])] == !updown) / length (updown))
+    return (sum (single.binary.vector[!is.na(price.matrix[,'Close'])] == !updown) / length (updown))
   }
 }
 
@@ -224,7 +224,7 @@ testing.return.fn = function (trmi.train, trmi.test, prices.train, prices.test, 
 }
 
 # Umbrella Plotter
-umbrella.plotter.fn = function (TRMI.train, TRMI.test, prices.train, prices.test, sentiments, association.vector, store.printables = FALSE){
+general.plotter.fn = function (TRMI.train, TRMI.test, prices.train, prices.test, sentiments, association.vector, store.printables = FALSE){
   
   # Produce Vector of Optimal Smoothing Alpha
   splitfactor.optim.vector = NULL
@@ -288,10 +288,10 @@ printables.fn = function (strategy.printable, baseline.printable, length.train, 
 }
 
 # Sentiment Names
-sentiments.testing = names (Crude.TRMI.dai.2011)[8:33]
+sentiments.testing = names (TRMI.dai.2011)[8:33]
 
 # Sentiment Association Directions from Individual Testing
 association.vector = c (-1, 1, -1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, -1, 1, 1, 1, 1, 1, 1, -1)
 
 # Run The Program
-umbrella.plotter.fn (Crude.TRMI.dai.2011, Crude.TRMI.dai.2015, Crude.PRICE.2011, Crude.PRICE.2015, sentiments.testing, association.vector, store.printables = TRUE)
+general.plotter.fn (TRMI.dai.2011, TRMI.dai.2015, PRICE.2011, PRICE.2015, sentiments.testing, association.vector, store.printables = TRUE)
