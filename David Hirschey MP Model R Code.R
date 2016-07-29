@@ -223,7 +223,7 @@ testing.return.fn = function (trmi.train, trmi.test, prices.train, prices.test, 
   return (umbrella.hist.2015)
 }
 
-# Umbrella Plotter
+# General Plotter
 general.plotter.fn = function (TRMI.train, TRMI.test, prices.train, prices.test, sentiments, association.vector, store.printables = FALSE){
   
   # Produce Vector of Optimal Smoothing Alpha
